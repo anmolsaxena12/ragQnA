@@ -1,59 +1,60 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useRef } from "react";
+import QuestionInput from "./QuestionInput";
+import AnswerDisplay from "./AnswerDisplay";
 
 export default function QABox() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [displayedText, setDisplayedText] = useState("");
+  const typingInterval = useRef(null);
+
+  useEffect(() => {
+    if (answer && answer.answer) {
+      setDisplayedText("");
+      let idx = 0;
+      clearInterval(typingInterval.current);
+      typingInterval.current = setInterval(() => {
+        setDisplayedText((text) => text + answer.answer.charAt(idx));
+        idx++;
+        if (idx >= answer.answer.length) clearInterval(typingInterval.current);
+      }, 14);
+    }
+    return () => clearInterval(typingInterval.current);
+  }, [answer]);
 
   const askQuestion = async () => {
-    if (!question) return;
+    if (!question.trim() || loading) return;
     setLoading(true);
+    setAnswer(null);
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/answer", {
-        question: question,
+      const res = await fetch("http://127.0.0.1:8000/api/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
       });
-      setAnswer(res.data);
-    } catch (error) {
-      console.error(error);
-      setAnswer({ answer: "Error fetching answer", sources: [] });
+      const data = await res.json();
+      setAnswer(data);
+    } catch {
+      setAnswer({ answer: "Error fetching answer.", sources: [] });
     } finally {
       setLoading(false);
+      setQuestion("");
     }
   };
 
   return (
-    <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-6">
-      <input
-        type="text"
-        className="w-full p-2 border rounded-md mb-4"
-        placeholder="Ask a question about the document..."
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-      />
-      <button
-        onClick={askQuestion}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        disabled={loading}
-      >
-        {loading ? "Searching..." : "Ask"}
-      </button>
-
-      {answer && (
-        <div className="mt-6">
-          <h2 className="text-lg font-semibold text-gray-800">Answer:</h2>
-          <p className="mt-2 text-gray-700">{answer.answer}</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Confidence: {(answer.score * 100).toFixed(1)}%
-          </p>
-          <h3 className="mt-4 font-semibold text-gray-700">Sources:</h3>
-          <ul className="list-disc list-inside text-gray-600">
-            {answer.sources.map((src, i) => (
-              <li key={i}>{src}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4 dark">
+      <div className="w-full max-w-2xl p-8 shadow-2xl rounded-3xl bg-gradient-to-br from-slate-900 via-gray-800 to-gray-900 border border-gray-700">
+        <h2 className="text-2xl font-semibold text-slate-300 text-center mb-8">Ask Anything About Your Documents</h2>
+        <QuestionInput
+          question={question}
+          setQuestion={setQuestion}
+          askQuestion={askQuestion}
+          loading={loading}
+        />
+        <AnswerDisplay answer={answer} displayedText={displayedText} />
+      </div>
     </div>
   );
 }
