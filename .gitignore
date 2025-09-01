@@ -1,0 +1,42 @@
+# Python cache & bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+env/
+venv/
+rag/
+
+# Jupyter/Colab
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Index and model files
+/index/*.index
+/index/*.pkl
+/index/*.npy
+/index/*.bin
+
+# Data files (keep raw PDFs only if you want)
+data/*.txt
+data/*.json
+data/*.csv
+data/*.parquet
+
+# Large model checkpoints (handled separately if needed)
+*.pt
+*.ckpt
+*.bin
+
+# VSCode / PyCharm configs
+.vscode/
+.idea/
