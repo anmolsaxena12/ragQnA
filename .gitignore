@@ -40,3 +40,13 @@ data/*.parquet
 # VSCode / PyCharm configs
 .vscode/
 .idea/
+
+# Node.js modules for frontend
+proj-1-retrieval-ui/node_modules/
+
+# Editor configs
+.vscode/
+.idea/
+
+# Build outputs (if frontend uses Vite or similar)
+proj-1-retrieval-ui/dist/
